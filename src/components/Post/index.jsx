@@ -15,6 +15,7 @@ export function Post({ author, content, publisherAt }) {
   const publisherDateRelativeToNow = formatDistanceToNow(publisherAt, {
     addSuffix: true,
   })
+
   function handleCreateNewComment(e) {
     e.preventDefault()
 
@@ -24,6 +25,23 @@ export function Post({ author, content, publisherAt }) {
 
     setNewCommentText('')
   }
+
+  function handleNewCommentChange(event) {
+    event.target.setCustomValidity('')
+    setNewCommentText(event.target.value)
+  }
+
+  function handleNewCommentInvalid(event) {
+    event.target.setCustomValidity('Esse campo é obrigatório!')
+  }
+
+  function deleteComment(commentToDelete) {
+    const commentsWithoutDeletedOne = comments.filter(comment => comment !== commentToDelete)
+    setComments(commentsWithoutDeletedOne)
+  }
+
+  const isNewCommentEmpty = newCommentText.length === 0
+
   return (
     <article className={styles.post}>
       <header>
@@ -59,16 +77,29 @@ export function Post({ author, content, publisherAt }) {
         <textarea
           name="comment"
           value={newCommentText}
-          onChange={(e) => setNewCommentText(e.target.value)}
+          onChange={(ev) => handleNewCommentChange(ev)}
           placeholder='Deixe um comentário'
+          required
+          onInvalid={(ev) => handleNewCommentInvalid(ev)}
         />
         <footer>
-          <button type="submit">Publicar</button>
+          <button
+            type="submit"
+            disabled={isNewCommentEmpty}
+          >
+            Publicar
+          </button>
         </footer>
       </form>
       <div className={styles.commentList}>
         {comments.map((comment, index) => {
-          return <Comment key={index} content={comment} />
+          return (
+            <Comment
+              key={index}
+              content={comment}
+              onDeleteComment={deleteComment}
+            />
+          )
         })}
       </div>
     </article>
